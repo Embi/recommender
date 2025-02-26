@@ -1,0 +1,6 @@
+.env
+.env.*
+.coverage
+.ctags
+coverage.xml
+__pycache__/

@@ -1,0 +1,14 @@
+fakeredis
+flexmock
+pre-commit
+pytest==7.4.4
+pytest-asyncio==0.23.2
+pytest-cov
+pytest-env
+types-urllib3
+types-redis
+bpython
+-r api/requirements.txt
+-r core/requirements.txt
+-r monitoring/requirements.txt
+-r pipelines/requirements.txt

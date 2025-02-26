@@ -1,0 +1,124 @@
+x-pg: &pg
+  POSTGRES_HOST: "postgres:5432"
+  POSTGRES_DB: backend
+  POSTGRES_USER: testuser
+  POSTGRES_PASSWORD: testpass
+
+x-core: &core
+  <<: [*pg]
+  VERSION: "0.0.1"
+  LOG_LEVEL: "DEBUG"
+  TOKEN_SECRET: "superdupersecret"
+  RMQ_USER: backend
+  RMQ_PASS: backendpass
+  RMQ_HOST: rabbit
+  RMQ_PORT: 5672
+  RMQ_VHOST: "broker"
+  PUBSUB_URL: "redis://pubsub:6379"
+
+x-api: &api
+  <<: *core
+  DOCS_URL: "/docs"
+  REDOC_URL:  "/redocs"
+  ROOT_PATH:  "/api"
+  TOKEN_SECRET: "superdupersecret"
+
+services:
+  api:
+    build:
+      dockerfile: api/Dockerfile
+      context: backend
+    restart: unless-stopped
+    environment:
+      <<: *api
+    networks:
+      internal:
+        aliases:
+          - backend
+    ports:
+      - "8000:8000"
+  redis:
+    image:  redis
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: redis-data
+        target: /data
+    networks:
+      internal:
+        aliases:
+          - redis
+  pubsub:
+    image:  redis
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: pubsub-data
+        target: /data
+    networks:
+      internal:
+        aliases:
+          - pubsub
+    ports:
+      - "6379:6379"
+  postgres:
+    image: pgvector/pgvector:pg17
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_DB: backend
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql/data/
+    networks:
+      internal:
+        aliases:
+          - postgres
+    ports:
+      - "5432:5432"
+  rabbit:
+    image:  "rabbitmq:3-management"
+    restart: unless-stopped
+    networks:
+      internal:
+        aliases:
+          - rabbit
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    volumes:
+      - ./definitions.json:/etc/rabbitmq/definitions.json
+      - ./rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf
+  content-based-pipeline:
+    build:
+      dockerfile: ./pipelines/Dockerfile
+      context: backend
+    restart: unless-stopped
+    environment:
+      <<: *core
+      PIPELINE_NAME: "content-based-pipeline"
+    networks:
+      - internal
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: frontend
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: "http://localhost:8080/api/v1/"
+    networks:
+      internal:
+    ports:
+      - "8080:80"
+
+volumes:
+  postgres-data:
+  redis-data:
+  pubsub-data:
+
+networks:
+  internal:
+    driver: bridge

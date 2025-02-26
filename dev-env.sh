@@ -1,0 +1,16 @@
+export TOKEN_SECRET="supersecret"
+export DOCS_URL="/api/docs"
+export REDOC_URL="/api/redoc"
+export RMQ_USER=backend
+export RMQ_PASS=backendpass
+export RMQ_VHOST="broker"
+export RMQ_HOST="localhost"
+export RMQ_PORT="5672"
+export PUBSUB_URL="redis://localhost:6379"
+export POSTGRES_HOST="0.0.0.0:5432"
+export POSTGRES_DB=backend
+export POSTGRES_USER=testuser
+export POSTGRES_PASSWORD=testpass
+export VERSION="0.0.1"
+export LOG_LEVEL="DEBUG"
+export PYTHONPATH="$PYTHONPATH:$(pwd)/backend"
