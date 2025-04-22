@@ -99,7 +99,7 @@ services:
     restart: unless-stopped
     environment:
       <<: *core
-      PIPELINE_NAME: "content-based-pipeline"
+      PIPELINE_NAME: "content_based_pipeline"
     networks:
       - internal
   frontend:
